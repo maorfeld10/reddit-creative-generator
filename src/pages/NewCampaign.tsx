@@ -27,6 +27,14 @@ const GOALS = ['CTR', 'conversion', 'balanced'];
 const MAX_INSPIRATION_IMAGES = 3;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 MB
 
+function extractErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'object' && error && 'message' in error) {
+    return String((error as { message: unknown }).message);
+  }
+  return fallback;
+}
+
 interface CampaignFormValues {
   campaignName: string;
   brandName: string;
@@ -69,12 +77,7 @@ export default function NewCampaign() {
       toast.success('Image generated successfully!');
     } catch (error) {
       console.error('Puter image generation failed:', error);
-      const message =
-        error instanceof Error
-          ? error.message
-          : typeof error === 'object' && error && 'message' in error
-            ? String((error as { message: unknown }).message)
-            : 'Image generation failed.';
+      const message = extractErrorMessage(error, 'Image generation failed.');
       toast.error(`Puter image generation failed: ${message}`);
     } finally {
       setIsGeneratingImage((prev) => ({ ...prev, [index]: false }));
@@ -183,9 +186,9 @@ export default function NewCampaign() {
 
       toast.success('Campaign generated and saved to Library!');
     } catch (error) {
-      console.error(error);
-      const message = error instanceof Error ? error.message : 'Failed to generate campaign.';
-      toast.error(message);
+      console.error('Puter campaign generation failed:', error);
+      const message = extractErrorMessage(error, 'Failed to generate campaign.');
+      toast.error(`Puter campaign generation failed: ${message}`);
     } finally {
       setIsGenerating(false);
     }

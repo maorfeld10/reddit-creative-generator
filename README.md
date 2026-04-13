@@ -1,17 +1,16 @@
 # Reddit Ads Creative Machine
 
-A bring-your-own-key (BYOK) tool that turns a short brief into a full Reddit Ads creative package — angles, headlines, post copy, image prompts, subreddit targeting, and 1:1 ad images — using Google's Gemini API.
+A zero-friction tool that turns a short brief into a full Reddit Ads creative package — angles, headlines, post copy, image prompts, subreddit targeting, and 1:1 ad images.
 
-The app is a fully client-side React SPA. Each user pastes their own Gemini API key on first launch; the key is stored only in their browser and is sent directly to the Google Generative AI API. Nothing is proxied through a server, so there are no secrets to manage and hosting is free on Vercel.
+No API keys, no signup. The app runs 100% in the browser and calls Google's Gemini (text) and Imagen (image) models through [Puter.js](https://developer.puter.com/), so end users don't need to bring their own keys. Hosting is free on Vercel because there's no backend.
 
 ## Features
 
 - **Campaign Builder** — brand, vertical, offer, CTA, tone, goal, and creative count.
-- **Strategic generation** — angles, Reddit-native titles, post bodies, and subreddit targeting grouped by intent.
-- **Image generation** — high-detail "Nano Banana" prompts plus on-demand 1:1 image generation.
+- **Strategic generation** — angles, Reddit-native titles, post bodies, and subreddit targeting grouped by intent, powered by `google/gemini-2.5-flash` via Puter.
+- **Image generation** — 1:1 ad creatives powered by `google/imagen-4.0-fast` via Puter.
 - **Library** — every campaign auto-saves to your browser and is browsable, copyable, and deletable.
 - **Templates** — vertical presets to jump-start common campaign types.
-- **BYOK setup screen** — link to Google AI Studio, password-style input, reset key from the sidebar.
 
 ## Tech stack
 
@@ -21,7 +20,7 @@ The app is a fully client-side React SPA. Each user pastes their own Gemini API 
 - shadcn/ui + lucide-react + sonner
 - React Router 7
 - React Hook Form
-- @google/genai (Gemini SDK)
+- [@heyputer/puter.js](https://developer.puter.com/) for all AI calls
 
 ## Run locally
 
@@ -30,9 +29,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000 and paste your Gemini API key on the setup screen. Get one for free at https://aistudio.google.com/apikey.
-
-No `.env` file is required — the app does not read any environment variables.
+Open http://localhost:3000. No `.env` file and no API keys are required.
 
 ## Type-check / build
 
@@ -54,12 +51,16 @@ npm run preview     # serve ./dist locally
 
 `vercel.json` rewrites all routes to `/` so React Router's client-side routes work on direct refresh.
 
-## Security model
+## How the AI calls work
 
-- The Gemini API key is stored in `localStorage` under the `reddit_ads_gemini_api_key` key.
-- All Gemini calls are made directly from the user's browser to `generativelanguage.googleapis.com` using the `@google/genai` SDK.
-- The key is never sent to any server controlled by this project.
-- Anyone with access to a particular browser profile can read the key from devtools — this is the standard trade-off for BYOK SPAs. Don't paste shared / billable keys into someone else's machine.
+All text and image generation happens in the browser through Puter.js:
+
+- **Text (campaign JSON):** `puter.ai.chat(prompt, { model: 'google/gemini-2.5-flash' })`
+- **Images (1:1 creatives):** `puter.ai.txt2img(prompt, { model: 'google/imagen-4.0-fast', aspect_ratio: '1:1' })`
+
+Puter handles auth, billing, and rate limiting on their end; end users don't see any of it. If Puter is temporarily unavailable, users see a Sonner toast with the exact error and can retry.
+
+Model names are centralized as `TEXT_MODEL` and `IMAGE_MODEL` constants in [src/lib/gemini.ts](src/lib/gemini.ts) so they're easy to swap.
 
 ## License
 

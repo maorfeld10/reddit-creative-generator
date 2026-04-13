@@ -1,8 +1,6 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Library, LayoutTemplate, Zap, KeyRound } from 'lucide-react';
+import { Library, LayoutTemplate, Zap } from 'lucide-react';
 import { cn } from './lib/utils';
-import { clearApiKey } from './lib/api-key';
-import { toast } from 'sonner';
 
 export default function Layout() {
   const location = useLocation();
@@ -12,15 +10,6 @@ export default function Layout() {
     { name: 'Library', path: '/library', icon: Library },
     { name: 'Templates', path: '/templates', icon: LayoutTemplate },
   ];
-
-  const handleResetKey = () => {
-    const confirmed = window.confirm(
-      'Remove your Gemini API key from this browser? You will need to enter it again to keep using the app.'
-    );
-    if (!confirmed) return;
-    clearApiKey();
-    toast.success('API key removed.');
-  };
 
   return (
     <div className="flex h-screen bg-neutral-50 text-neutral-900">
@@ -58,16 +47,8 @@ export default function Layout() {
           })}
         </nav>
 
-        <div className="p-4 border-t border-neutral-100 space-y-3">
-          <button
-            type="button"
-            onClick={handleResetKey}
-            className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-sm font-medium text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
-          >
-            <KeyRound className="w-4 h-4 text-neutral-400" />
-            <span>Reset API key</span>
-          </button>
-          <div className="text-xs text-neutral-400 text-center">Internal Tool v1.0</div>
+        <div className="p-4 border-t border-neutral-100 text-xs text-neutral-400 text-center">
+          Powered by Puter
         </div>
       </aside>
 
