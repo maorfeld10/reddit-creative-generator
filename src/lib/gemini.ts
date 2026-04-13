@@ -1,8 +1,9 @@
 import { GoogleGenAI, Type } from '@google/genai';
+import puter from '@heyputer/puter.js';
 import { getApiKey, MissingApiKeyError } from './api-key';
 
 export const TEXT_MODEL = 'gemini-3.1-pro-preview';
-export const IMAGE_MODEL = 'gemini-2.5-flash-image';
+export const IMAGE_MODEL = 'google/imagen-4.0-fast';
 
 function getClient(): GoogleGenAI {
   const apiKey = getApiKey();
@@ -230,25 +231,14 @@ Generate the following:
 };
 
 export const generateImageFromPrompt = async (prompt: string): Promise<string> => {
-  const ai = getClient();
-
-  const response = await ai.models.generateContent({
+  const image = await puter.ai.txt2img(prompt, {
     model: IMAGE_MODEL,
-    contents: {
-      parts: [{ text: prompt }],
-    },
-    config: {
-      imageConfig: {
-        aspectRatio: '1:1',
-        imageSize: '1K',
-      },
-    },
+    aspect_ratio: '1:1',
   });
 
-  for (const part of response.candidates?.[0]?.content?.parts || []) {
-    if (part.inlineData) {
-      return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-    }
+  const src = (image as { src?: string })?.src;
+  if (!src) {
+    throw new Error('Puter returned no image URL.');
   }
-  throw new Error('No image generated');
+  return src;
 };

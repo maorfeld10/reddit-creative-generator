@@ -68,8 +68,14 @@ export default function NewCampaign() {
 
       toast.success('Image generated successfully!');
     } catch (error) {
-      console.error(error);
-      toast.error(error instanceof Error ? error.message : 'Failed to generate image.');
+      console.error('Puter image generation failed:', error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : typeof error === 'object' && error && 'message' in error
+            ? String((error as { message: unknown }).message)
+            : 'Image generation failed.';
+      toast.error(`Puter image generation failed: ${message}`);
     } finally {
       setIsGeneratingImage((prev) => ({ ...prev, [index]: false }));
     }
